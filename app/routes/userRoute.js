@@ -34,8 +34,10 @@ exports.updateUser = function(req, res) {
 		User.findById(req.params.user_id, function(err, user){
 			if (err)
 				res.send(err);
-			user.name = req.body.name;
-			user.password = req.body.password;
+				if (req.body.name != '')
+					user.name = req.body.name;
+				if(req.body.password != '')
+					user.password = req.body.password;
 			user.save(function(err){
 				if (err)
 					res.send(err);

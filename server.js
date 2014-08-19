@@ -1,6 +1,8 @@
 //Get the packages and dependency files
 var mongoose = require('mongoose'),
 	express = require('express'),
+	passport = require('passport'),
+	LocalStrategy = require('passport-local').Strategy,
 	bodyParser = require('body-parser'),
 	middleWares = require('./app/middlewares.js'),
 	userRoutes = require('./app/routes/userRoute.js'),
@@ -20,8 +22,41 @@ var router = express.Router();
 
 //Middleware to use for all req
 router.use(middleWares.middleWare);
-router.get('/', function(req, res){
-	res.json({ message: "horray, welcome to our api!"});
+router.use(passport.initialize());
+router.use(passport.session());
+
+passport.serializeUser(function(user, done){
+	done(null, user);
+});
+passport.deserializeUser(function(user, done){
+	done(null, user);
+});
+passport.use(new LocalStrategy(function(name, password, done){
+	process.nextTick( function() {
+		User.findOne({
+				'name': name,
+			}, function(err, user){
+					if(err) { return done(err); }
+					if(!user) { return done(null, false); }
+					if(user.password != password) { return done(null, false); }
+
+					return done(null, user);
+			});
+	});
+	}
+));
+//Additional Routes
+router.post('/login',
+	passport.authenticate('local', {
+		successRedirect:'/api/loginSuccess',
+		failureRedirect: '/api/loginFailure'
+	})
+);
+router.get('/loginFailure', function (req, res, next){
+	res.send('Failed to authenticate');
+});
+router.get('/loginSuccess', function(req, res, next){
+	res.send('Successfully authenticated');
 });
 //User routes
 var Users = router.route('/users');
@@ -32,7 +67,7 @@ var SingleUser = router.route('/users/:user_id');
 	SingleUser.get(userRoutes.getSingleUser);
 	SingleUser.put(userRoutes.updateUser);
 	SingleUser.delete(userRoutes.deleteUser);
-//Register the routes
+//Register the base route
 app.use('/api', router);
 
 //Boot up Sever

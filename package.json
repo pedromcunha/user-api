@@ -1,9 +1,11 @@
 {
-	"name": "users-api",
-	"main": "server.js",
-	"dependencies": {
-		"express": "latest",
-		"mongoose": "latest",
-		"body-parser": "latest"
-	}
+  "name": "users-api",
+  "main": "server.js",
+  "dependencies": {
+    "express": "latest",
+    "mongoose": "latest",
+    "body-parser": "latest",
+    "passport": "^0.2.0",
+    "passport-local": "^1.0.0"
+  }
 }
