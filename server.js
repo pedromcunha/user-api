@@ -61,7 +61,19 @@ var SingleUser = router.route('/users/:user_id');
 		});
 	});
 	SingleUser.put(function(req, res) {
-		
+		//Find user by using the user model/schema
+		User.findById(req.params.user_id, function(err, user){
+			if (err)
+				res.send(err);
+			user.name = req.body.name;
+			user.password = req.body.password;
+			user.save(function(err){
+				if (err)
+					res.send(err);
+				else 
+					res.json({message: "User Updated!"})
+			});
+		});
 	});
 //Register the routes
 app.use('/api', router);
