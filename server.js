@@ -75,6 +75,16 @@ var SingleUser = router.route('/users/:user_id');
 			});
 		});
 	});
+	SingleUser.delete(function(req, res){
+		User.remove({
+			_id: req.params.user_id
+		}, function(err, user){
+			if (err)
+				res.send(err);
+			else
+				res.json({message: "Account has been deleted"});
+		});
+	});
 //Register the routes
 app.use('/api', router);
 
