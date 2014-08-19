@@ -1,7 +1,9 @@
-//Get the packages
+//Get the packages and dependency files
 var mongoose = require('mongoose'),
 	express = require('express'),
 	bodyParser = require('body-parser'),
+	middleWares = require('./app/middlewares.js'),
+	userRoutes = require('./app/routes/userRoute.js'),
 	app = express();
 
 //Pull in Schemas
@@ -17,74 +19,19 @@ mongoose.connect('mongodb://localhost/restful');
 var router = express.Router(); 
 
 //Middleware to use for all req
-router.use(function(req, res, next){
-	//do logging stuffs
-	console.log('Something is going on!!');
-	next();//continue the route
-});
+router.use(middleWares.middleWare);
 router.get('/', function(req, res){
 	res.json({ message: "horray, welcome to our api!"});
 });
 //User routes
 var Users = router.route('/users');
-//Create a user
-	Users.post(function(req, res){
-		var user = new User(); //new instance of the user model defined in schemas
-		user.name = req.body.name; //name comes from the req
-		user.password = req.body.password;
-
-		//Save
-		user.save(function(err){
-			if(err)
-				res.send(err);
-			else
-				res.json({message: 'User Created!'});
-		});
-	});
-//Get all the users
-	Users.get(function(req, res){
-		User.find(function(err, users){
-			if(err)
-				res.send(err);
-			else
-				res.json(users);
-		});
-	});
+	Users.post(userRoutes.registerUser);
+	Users.get(userRoutes.getAllUsers);
 //Make a new route to handle a single user
 var SingleUser = router.route('/users/:user_id');
-	SingleUser.get(function(req,res){
-		User.findById(req.params.user_id, function(err, user){
-			if(err)
-				res.send(err);
-			else
-				res.json(user);
-		});
-	});
-	SingleUser.put(function(req, res) {
-		//Find user by using the user model/schema
-		User.findById(req.params.user_id, function(err, user){
-			if (err)
-				res.send(err);
-			user.name = req.body.name;
-			user.password = req.body.password;
-			user.save(function(err){
-				if (err)
-					res.send(err);
-				else 
-					res.json({message: "User Updated!"})
-			});
-		});
-	});
-	SingleUser.delete(function(req, res){
-		User.remove({
-			_id: req.params.user_id
-		}, function(err, user){
-			if (err)
-				res.send(err);
-			else
-				res.json({message: "Account has been deleted"});
-		});
-	});
+	SingleUser.get(userRoutes.getSingleUser);
+	SingleUser.put(userRoutes.updateUser);
+	SingleUser.delete(userRoutes.deleteUser);
 //Register the routes
 app.use('/api', router);
 
